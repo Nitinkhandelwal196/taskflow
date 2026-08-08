@@ -2,11 +2,12 @@ pipeline {
   agent any
 
   environment {
-    DOCKERHUB_CREDS = credentials('dockerhub-creds')       // Jenkins credential ID
-    DOCKERHUB_USER  = 'YOUR_DOCKERHUB_USERNAME'
-    GIT_CREDS       = credentials('github-creds')          // for pushing to GitOps repo
-    GITOPS_REPO     = 'https://github.com/YOUR_USERNAME/taskflow-gitops.git'
-    SONAR_HOST_URL  = 'http://sonarqube:9000'               // your SonarQube server
+    DOCKERHUB_CREDS = credentials('dockerhub')       // Jenkins credential ID
+    DOCKERHUB_USER  = 'dockerinfo196'
+    GIT_CREDS       = credentials('github')          // for pushing to GitOps repo
+    GITOPS_REPO     = 'https://github.com/Nitinkhandelwal196/taskflow-gitops.git'
+    SONAR_ORG       = 'nitinkhandelwal196'
+    SONAR_PROJECT   = 'Nitinkhandelwal196_taskflow'
     IMAGE_TAG       = "${env.BUILD_NUMBER}"
   }
 
@@ -27,18 +28,19 @@ pipeline {
       }
     }
 
-    stage('SonarQube Analysis') {
-      steps {
-        withSonarQubeEnv('sonarqube-server') {
-          sh '''
-            sonar-scanner \
-              -Dsonar.projectKey=taskflow \
-              -Dsonar.sources=backend/src,frontend/src \
-              -Dsonar.host.url=$SONAR_HOST_URL
-          '''
-        }
-      }
+    stage('SonarCloud Analysis') {
+  steps {
+    withSonarQubeEnv('sonarcloud') {
+      sh '''
+        sonar-scanner \
+          -Dsonar.organization=$SONAR_ORG \
+          -Dsonar.projectKey=$SONAR_PROJECT \
+          -Dsonar.sources=backend/src,frontend/src \
+          -Dsonar.host.url=https://sonarcloud.io
+      '''
     }
+  }
+}
 
     stage('Quality Gate') {
       steps {
